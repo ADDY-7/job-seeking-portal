@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Jobs | CareerNest</title>
+  <meta name="description" content="Browse thousands of internships and entry-level jobs on CareerNest.">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo">Career<span>Nest</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="jobs.html" class="active">Jobs</a>
+      <a href="dashboard.html">My Applications</a>
+      <a href="login.html" class="nav-cta">Sign In</a>
+    </nav>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>Browse <span
+        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Open
+        Roles</span></h1>
+    <p>12,000+ internships and entry-level positions waiting for you</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search job title, company, or keyword…" oninput="filterJobs()">
+      <button class="search-btn">Search</button>
+    </div>
+  </div>
+
+  <!-- FILTER CHIPS -->
+  <div class="filter-chips">
+    <span class="chip active" onclick="setFilter(this,'all')">All Roles</span>
+    <span class="chip" onclick="setFilter(this,'remote')">🌐 Remote</span>
+    <span class="chip" onclick="setFilter(this,'intern')">🎓 Internship</span>
+    <span class="chip" onclick="setFilter(this,'full')">💼 Full-time</span>
+    <span class="chip" onclick="setFilter(this,'tech')">💻 Tech</span>
+    <span class="chip" onclick="setFilter(this,'design')">🎨 Design</span>
+    <span class="chip" onclick="setFilter(this,'data')">📊 Data</span>
+  </div>
+
+  <!-- JOBS GRID -->
+  <div class="jobs-grid" id="jobsGrid">
+
+    <div class="job-card" data-tags="tech intern">
+      <div class="job-card-header">
+        <div class="job-company-icon">💻</div>
+        <div class="job-meta">
+          <div class="title">Frontend Developer Intern</div>
+          <div class="company">TechNova · Pune</div>
+        </div>
+        <span class="job-badge hot">Hot 🔥</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">📍 Pune, India</span>
+        <span class="job-detail-item">🕐 6 months</span>
+        <span class="job-detail-item">🎓 Internship</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">React</span>
+        <span class="tag">CSS</span>
+        <span class="tag cyan">JavaScript</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹25K/mo</span>
+        <button class="apply-btn" onclick="applyJob(this, 'Frontend Developer Intern', 'TechNova')">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="job-card" data-tags="tech remote full">
+      <div class="job-card-header">
+        <div class="job-company-icon">☁️</div>
+        <div class="job-meta">
+          <div class="title">Backend Developer</div>
+          <div class="company">Cloudify · Remote</div>
+        </div>
+        <span class="job-badge">New ✨</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">🌐 Remote</span>
+        <span class="job-detail-item">📅 Full-time</span>
+        <span class="job-detail-item">💼 0–2 yrs exp</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">Node.js</span>
+        <span class="tag">MongoDB</span>
+        <span class="tag green">REST APIs</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹6–10 LPA</span>
+        <button class="apply-btn" onclick="applyJob(this, 'Backend Developer', 'Cloudify')">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="job-card" data-tags="data intern">
+      <div class="job-card-header">
+        <div class="job-company-icon">📊</div>
+        <div class="job-meta">
+          <div class="title">Data Analyst Intern</div>
+          <div class="company">InsightWorks · Mumbai</div>
+        </div>
+        <span class="job-badge">New ✨</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">📍 Mumbai</span>
+        <span class="job-detail-item">🕐 3 months</span>
+        <span class="job-detail-item">🎓 Internship</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">Python</span>
+        <span class="tag">SQL</span>
+        <span class="tag cyan">Excel</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹15K/mo</span>
+        <button class="apply-btn" onclick="applyJob(this, 'Data Analyst Intern', 'InsightWorks')">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="job-card" data-tags="design remote full">
+      <div class="job-card-header">
+        <div class="job-company-icon">🎨</div>
+        <div class="job-meta">
+          <div class="title">UI/UX Designer</div>
+          <div class="company">PixelCraft · Remote</div>
+        </div>
+        <span class="job-badge hot">Hot 🔥</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">🌐 Remote</span>
+        <span class="job-detail-item">📅 Full-time</span>
+        <span class="job-detail-item">💼 Fresher OK</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">Figma</span>
+        <span class="tag green">Prototyping</span>
+        <span class="tag">Research</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹4–8 LPA</span>
+        <button class="apply-btn" onclick="applyJob(this, 'UI/UX Designer', 'PixelCraft')">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="job-card" data-tags="tech intern remote">
+      <div class="job-card-header">
+        <div class="job-company-icon">🤖</div>
+        <div class="job-meta">
+          <div class="title">ML Engineer Intern</div>
+          <div class="company">NeuralEdge · Bengaluru</div>
+        </div>
+        <span class="job-badge">New ✨</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">📍 Bengaluru</span>
+        <span class="job-detail-item">🕐 6 months</span>
+        <span class="job-detail-item">🎓 Internship</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">Python</span>
+        <span class="tag">TensorFlow</span>
+        <span class="tag cyan">PyTorch</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹30K/mo</span>
+        <button class="apply-btn" onclick="applyJob(this, 'ML Engineer Intern', 'NeuralEdge')">Apply Now</button>
+      </div>
+    </div>
+
+    <div class="job-card" data-tags="full tech">
+      <div class="job-card-header">
+        <div class="job-company-icon">🛡️</div>
+        <div class="job-meta">
+          <div class="title">DevOps Engineer</div>
+          <div class="company">ShieldOps · Hyderabad</div>
+        </div>
+        <span class="job-badge">New ✨</span>
+      </div>
+      <div class="job-details">
+        <span class="job-detail-item">📍 Hyderabad</span>
+        <span class="job-detail-item">📅 Full-time</span>
+        <span class="job-detail-item">💼 0–1 yr exp</span>
+      </div>
+      <div class="job-tags-row">
+        <span class="tag">Docker</span>
+        <span class="tag green">AWS</span>
+        <span class="tag">CI/CD</span>
+      </div>
+      <div class="job-card-footer">
+        <span class="job-salary">₹7–12 LPA</span>
+        <button class="apply-btn" onclick="applyJob(this, 'DevOps Engineer', 'ShieldOps')">Apply Now</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">🎉</span>
+    <span id="toastMsg">Applied successfully!</span>
+  </div>
+
+  <script>
+    // Load existing applications from localStorage
+    let applications = JSON.parse(localStorage.getItem('applications')) || [];
+
+    // Mark already-applied buttons
+    document.querySelectorAll('.apply-btn').forEach(btn => {
+      const card = btn.closest('.job-card');
+      const title = card.querySelector('.title').textContent;
+      if (applications.find(a => a.jobTitle === title)) {
+        btn.textContent = '✓ Applied';
+        btn.classList.add('applied');
+        btn.disabled = true;
+      }
+    });
+
+    function applyJob(btn, jobTitle, company) {
+      if (btn.disabled) return;
+      applications.push({ jobTitle, company, date: new Date().toLocaleDateString() });
+      localStorage.setItem('applications', JSON.stringify(applications));
+      btn.textContent = '✓ Applied';
+      btn.classList.add('applied');
+      btn.disabled = true;
+      showToast('🎉', `Applied to ${jobTitle}!`);
+    }
+
+    function showToast(icon, msg) {
+      const toast = document.getElementById('toast');
+      document.querySelector('.toast-icon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    let activeFilter = 'all';
+
+    function setFilter(el, filter) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      activeFilter = filter;
+      filterJobs();
+    }
+
+    function filterJobs() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('.job-card').forEach(card => {
+        const tags = card.dataset.tags || '';
+        const text = card.innerText.toLowerCase();
+        const matchFilter = activeFilter === 'all' || tags.includes(activeFilter);
+        const matchSearch = !query || text.includes(query);
+        card.style.display = matchFilter && matchSearch ? 'flex' : 'none';
+      });
+    }
+  </script>
+
+</body>
+
+</html>

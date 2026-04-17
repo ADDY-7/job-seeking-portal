@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications | CareerNest</title>
+    <meta name="description" content="Track all your job applications in one clean dashboard on CareerNest.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo">Career<span>Nest</span></div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Jobs</a>
+            <a href="dashboard.html" class="active">My Applications</a>
+            <a href="login.html" class="nav-cta">Sign In</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="active">📊 &nbsp;Dashboard</a></li>
+                <li><a href="jobs.html">🔍 &nbsp;Browse Jobs</a></li>
+                <li><a href="#">📄 &nbsp;My Resume</a></li>
+                <li><a href="#">🔔 &nbsp;Alerts</a></li>
+                <div class="sidebar-label">Account</div>
+                <li><a href="#">⚙️ &nbsp;Settings</a></li>
+                <li><a href="login.html">🚪 &nbsp;Sign Out</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main-content">
+
+            <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;">My Applications</h1>
+            <p style="color:var(--text-secondary);font-size:15px;margin-bottom:32px;">Track every application and its
+                current status.</p>
+
+            <!-- STATS ROW -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card">
+                    <div class="label">Total Applied</div>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Under Review</div>
+                    <div class="value"
+                        style="background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"
+                        id="reviewCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">This Month</div>
+                    <div class="value" id="monthCount">0</div>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div id="progressWrap" style="margin-bottom:32px;display:none;">
+                <div
+                    style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">
+                    <span>Profile Completeness</span>
+                    <span>72%</span>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- Applications list -->
+            <h2 style="font-size:17px;font-weight:700;margin-bottom:18px;">Recent Applications</h2>
+            <div class="applications-grid" id="appList"></div>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">🗑️</span>
+        <span id="toastMsg">Removed application</span>
+    </div>
+
+    <script>
+        const icons = { 'TechNova': '💻', 'Cloudify': '☁️', 'InsightWorks': '📊', 'PixelCraft': '🎨', 'NeuralEdge': '🤖', 'ShieldOps': '🛡️' };
+        const statusCycles = ['applied', 'reviewing'];
+
+        let applications = JSON.parse(localStorage.getItem('applications')) || [];
+
+        function render() {
+            const container = document.getElementById('appList');
+            document.getElementById('totalCount').textContent = applications.length;
+            document.getElementById('monthCount').textContent = applications.length;
+            document.getElementById('reviewCount').textContent = Math.floor(applications.length * 0.4);
+
+            if (applications.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <span class="empty-icon">📭</span>
+            <h3>No Applications Yet</h3>
+            <p>You haven't applied to any jobs yet. Start exploring!</p>
+            <a href="jobs.html" class="primary-btn"><span>Browse Open Jobs</span></a>
+          </div>`;
+                return;
+            }
+
+            document.getElementById('progressWrap').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('progressBar').style.width = '72%';
+            }, 200);
+
+            container.innerHTML = '';
+            applications.forEach((app, i) => {
+                const icon = icons[app.company] || '🏢';
+                const statusStr = app.status || 'applied';
+                const card = document.createElement('div');
+                card.className = 'application-card';
+                card.style.animationDelay = `${i * 0.06}s`;
+                card.innerHTML = `
+          <div class="app-card-header">
+            <div class="app-icon">${icon}</div>
+            <div>
+              <div class="app-title">${app.jobTitle}</div>
+              <div class="app-company">${app.company || 'Company'}</div>
+            </div>
+          </div>
+          <span class="status-badge ${statusStr}">
+            <span class="status-dot"></span>
+            ${statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
+          </span>
+          <div class="app-date">📅 Applied: ${app.date || 'Recently'}</div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button onclick="removeApp(${i})" style="flex:1;padding:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:#ef4444;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;">Remove</button>
+          </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        function removeApp(i) {
+            applications.splice(i, 1);
+            localStorage.setItem('applications', JSON.stringify(applications));
+            showToast('🗑️', 'Application removed');
+            render();
+        }
+
+        function showToast(icon, msg) {
+            const toast = document.getElementById('toast');
+            document.querySelector('.toast-icon').textContent = icon;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        render();
+    </script>
+
+</body>
+
+</html>
