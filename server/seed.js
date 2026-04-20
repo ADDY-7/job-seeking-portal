@@ -1,9 +1,8 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
-const Job = require('./models/Job');
-const User = require('./models/User');
-const connectDB = require('./config/db');
+const pool   = require('./config/db');
+const JobRepo = require('./models/Job');
 
+// ─── Seed Data ────────────────────────────────────────────────────────────────
 const jobs = [
   {
     title: 'Frontend Developer Intern',
@@ -23,7 +22,7 @@ const jobs = [
     location: 'Remote',
     type: 'remote',
     category: 'tech',
-    tags: ['Node.js', 'MongoDB', 'REST APIs'],
+    tags: ['Node.js', 'PostgreSQL', 'REST APIs'],
     salary: '₹6–10 LPA',
     badge: 'new',
     icon: '☁️',
@@ -104,21 +103,28 @@ const jobs = [
 ];
 
 const seed = async () => {
-  await connectDB();
-
   try {
-    // Clear existing data
-    await Job.deleteMany({});
-    console.log('🗑️  Cleared existing jobs');
+    // Verify DB connection
+    await pool.query('SELECT 1');
+    console.log('✅  Connected to PostgreSQL');
 
-    // Insert jobs
-    await Job.insertMany(jobs);
+    // Clear existing jobs (preserves users and applications)
+    await pool.query('DELETE FROM jobs');
+    console.log('🗑️   Cleared existing jobs');
+
+    // Insert jobs using JobRepo
+    for (const job of jobs) {
+      await JobRepo.create(job, null); // null = no postedBy
+    }
     console.log(`✅  Seeded ${jobs.length} jobs`);
 
     process.exit(0);
   } catch (err) {
     console.error('❌  Seed error:', err.message);
     process.exit(1);
+  } finally {
+    // Close pool so the process exits cleanly
+    await pool.end();
   }
 };
 

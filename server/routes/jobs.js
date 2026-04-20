@@ -1,5 +1,5 @@
 const express = require('express');
-const Job = require('../models/Job');
+const JobRepo = require('../models/Job');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -10,27 +10,19 @@ router.get('/', async (req, res) => {
   try {
     const { search, type, category, page = 1, limit = 20 } = req.query;
 
-    const query = { isActive: true };
+    const offset = (Number(page) - 1) * Number(limit);
+    const filters = { search, type, category, limit: Number(limit), offset };
 
-    // Full-text search (uses the text index on title/company/tags)
-    if (search) {
-      query.$text = { $search: search };
-    }
-
-    if (type && type !== 'all') query.type = type;
-    if (category && category !== 'all') query.category = category;
-
-    const skip = (Number(page) - 1) * Number(limit);
-
+    // Replaces: Job.find(query).sort(...).skip(...).limit(...) + Job.countDocuments()
     const [jobs, total] = await Promise.all([
-      Job.find(query).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
-      Job.countDocuments(query),
+      JobRepo.findAll(filters),
+      JobRepo.count({ search, type, category }),
     ]);
 
     res.status(200).json({
       success: true,
       total,
-      page: Number(page),
+      page:  Number(page),
       pages: Math.ceil(total / Number(limit)),
       jobs,
     });
@@ -43,7 +35,8 @@ router.get('/', async (req, res) => {
 // ─── GET /api/jobs/:id ────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
+    // Replaces: Job.findById(req.params.id)
+    const job = await JobRepo.findById(req.params.id);
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
     res.status(200).json({ success: true, job });
   } catch (err) {
@@ -54,7 +47,8 @@ router.get('/:id', async (req, res) => {
 // ─── POST /api/jobs (admin only) ──────────────────────────────────────────────
 router.post('/', protect, authorize('admin'), async (req, res) => {
   try {
-    const job = await Job.create({ ...req.body, postedBy: req.user._id });
+    // Replaces: Job.create({ ...req.body, postedBy: req.user._id })
+    const job = await JobRepo.create(req.body, req.user.id);
     res.status(201).json({ success: true, job });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -64,7 +58,8 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
 // ─── DELETE /api/jobs/:id (admin only) ───────────────────────────────────────
 router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
+    // Replaces: Job.findByIdAndDelete(req.params.id)
+    const job = await JobRepo.deleteById(req.params.id);
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
     res.status(200).json({ success: true, message: 'Job deleted' });
   } catch (err) {

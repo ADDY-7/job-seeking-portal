@@ -1,10 +1,14 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const UserRepo = require('../models/User');
+
+// ─── protect middleware ───────────────────────────────────────────────────────
+// Verifies the Bearer JWT and attaches req.user (without password).
+// Replaces: User.findById(decoded.id).select('-password')  →  UserRepo.findById()
 
 const protect = async (req, res, next) => {
   let token;
 
-  // Check Authorization header: Bearer <token>
+  // Extract token from Authorization: Bearer <token>
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     token = req.headers.authorization.split(' ')[1];
   }
@@ -15,7 +19,9 @@ const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
+
+    // findById never returns the password column
+    req.user = await UserRepo.findById(decoded.id);
 
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'User not found' });
@@ -27,11 +33,15 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Middleware to restrict to specific roles
+// ─── authorize middleware ─────────────────────────────────────────────────────
+// Restricts access to specific roles (unchanged logic).
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: `Role '${req.user.role}' is not authorized for this action` });
+      return res.status(403).json({
+        success: false,
+        message: `Role '${req.user.role}' is not authorized for this action`,
+      });
     }
     next();
   };

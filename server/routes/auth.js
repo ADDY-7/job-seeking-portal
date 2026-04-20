@@ -1,7 +1,7 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
+const jwt     = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
+const UserRepo = require('../models/User');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -13,16 +13,19 @@ const signToken = (id) =>
   });
 
 // ─── Helper: send token response ─────────────────────────────────────────────
+// NOTE: returns both `id` (new) and `_id` (alias) so the existing
+// React frontend doesn't break if it reads user._id from localStorage.
 const sendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
+  const token = signToken(user.id);
   res.status(statusCode).json({
     success: true,
     token,
     user: {
-      _id: user._id,
-      name: user.name,
+      id:    user.id,
+      _id:   user.id,   // backward-compat alias for frontend
+      name:  user.name,
       email: user.email,
-      role: user.role,
+      role:  user.role,
     },
   });
 };
@@ -44,12 +47,15 @@ router.post(
     const { name, email, password } = req.body;
 
     try {
-      const existing = await User.findOne({ email });
+      // Replaces: User.findOne({ email })
+      const existing = await UserRepo.findByEmail(email);
       if (existing) {
         return res.status(400).json({ success: false, message: 'Email already registered' });
       }
 
-      const user = await User.create({ name, email, password });
+      // Replaces: User.create({ name, email, password })
+      // Password hashing happens inside UserRepo.create()
+      const user = await UserRepo.create({ name, email, password });
       sendToken(user, 201, res);
     } catch (err) {
       console.error('Register error:', err.message);
@@ -74,14 +80,16 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      // Include password explicitly (it's select: false in schema)
-      const user = await User.findOne({ email }).select('+password');
+      // includePassword=true → SELECT includes the password column (for comparison only)
+      // Replaces: User.findOne({ email }).select('+password')
+      const user = await UserRepo.findByEmail(email, true);
 
       if (!user) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
 
-      const isMatch = await user.matchPassword(password);
+      // Replaces: user.matchPassword(password)
+      const isMatch = await UserRepo.matchPassword(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
