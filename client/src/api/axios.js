@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// In production (AWS), VITE_API_URL points to the ALB DNS (e.g. https://api.careernest.com)
-// In development, it falls back to '' so the Vite proxy handles /api/* → localhost:5000
+// In production (AWS), API calls go directly to the ALB
+// In development, Vite proxy handles /api/* → localhost:5000
 const baseURL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api';

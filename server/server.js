@@ -3,6 +3,7 @@ const express      = require('express');
 const helmet       = require('helmet');
 const cors         = require('cors');
 const rateLimit    = require('express-rate-limit');
+const path         = require('path');
 const pool         = require('./config/db');   // PostgreSQL pool (not connectDB)
 
 const app = express();
@@ -16,7 +17,11 @@ app.use(helmet());
 // CORS – restrict to frontend origin only
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: [
+      process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+      'http://localhost:5173',
+      'http://careernest-alb-766610797.ap-south-1.elb.amazonaws.com',
+    ],
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -70,7 +75,19 @@ app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/jobs',         require('./routes/jobs'));
 app.use('/api/applications', require('./routes/applications'));
 
-// ─── 404 Handler ─────────────────────────────────────────────────────────────
+// ─── Serve React Frontend (from client/dist) ────────────────────────────────
+// Built with: cd client && npm run build
+const distPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(distPath));
+
+// Any non-API route → serve React's index.html (client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+// ─── 404 Handler (API routes only) ───────────────────────────────────────────
+// Note: This is now unreachable for non-API routes (React handles them above)
+// Keep it here for any future /api/* 404s
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
